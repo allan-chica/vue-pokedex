@@ -29,6 +29,7 @@ button {
 	border-radius: 5rem;
 	border: none;
 	cursor: pointer;
+	font-family: inherit;
 
 	background-color: var(--clr-muted);
 	color: var(--clr-white);
@@ -47,24 +48,4 @@ button.btn-primary {
 
 button.btn-primary:hover {
 	background: var(--clr-primary-dark);
-}
-
-/* button.btn-default {
-}
-
-button.btn-default:hover {
-	background-color: var(--clr-muted-hover);
-} */
-
-@media (min-width: 1024px) {
-  /* body {
-    display: flex;
-    place-items: center;
-  } */
-
-  /* #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  } */
 }
