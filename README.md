@@ -1,35 +1,36 @@
-# vue-pokedex
+# Vue Pokédex
 
-This template should help get you started developing with Vue 3 in Vite.
+A simple Pokédex web app built with [Vue 3](https://vuejs.org/) and [Vite](https://vitejs.dev/). It fetches Pokémon data from the [PokéAPI](https://pokeapi.co/) and displays a list of Pokémon on the homepage. You're also able to save Pokémon into a list of favorites.
 
-## Recommended IDE Setup
+## Tech Stack
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- [Vue 3](https://vuejs.org/)
+- [Vite](https://vitejs.dev/)
+- [PokéAPI](https://pokeapi.co/)
 
-## Customize configuration
+## Getting Started
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+### Prerequisites
 
-## Project Setup
+- [Node.js](https://nodejs.org/) (v18.3 or higher)
+- npm or yarn
 
-```sh
+### Installation
+
+```bash
+git clone https://github.com/allan-chica/vue-pokedex.git
+cd vue-pokedex
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Run Locally
 
-```sh
+```bash
 npm run dev
 ```
 
-### Compile and Minify for Production
+Open your browser at [http://localhost:5173](http://localhost:5173)
 
-```sh
-npm run build
-```
+## API Reference
 
-### Run Unit Tests with [Vitest](https://vitest.dev/)
-
-```sh
-npm run test:unit
-```
+Using [https://pokeapi.co/api/v2/pokemon?limit=10](https://pokeapi.co/api/v2/pokemon?limit=10) to fetch the first 10 Pokémon.

@@ -1,35 +1,70 @@
 @import './base.css';
 
 #app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
   font-weight: normal;
+	height: 100vh;
 }
 
-a,
-.green {
-  text-decoration: none;
-  color: hsla(160, 100%, 37%, 1);
-  transition: 0.4s;
-  padding: 3px;
+.container {
+  max-width: var(--max-width);
+  margin: 0 auto;
+	padding: 0rem 2rem;
 }
 
-@media (hover: hover) {
-  a:hover {
-    background-color: hsla(160, 100%, 37%, 0.2);
-  }
+@media (min-width: 36.625rem) {
+	.container {
+		padding: 0;
+	}
 }
+
+h4 {
+	font-size: 1.625rem;
+	color: var(--clr-text-heading);
+	font-weight: bold;
+}
+
+button {
+	padding: 0.6875rem 1.25rem;
+	font-size: inherit;
+	border-radius: 5rem;
+	border: none;
+	cursor: pointer;
+
+	background-color: var(--clr-muted);
+	color: var(--clr-white);
+	transition: background 0.15s;
+}
+
+button:hover {
+	background-color: var(--clr-muted-hover);
+}
+
+button.btn-primary {
+	background: var(--clr-primary);
+	color: var(--clr-white);
+	transition: background 0.15s;
+}
+
+button.btn-primary:hover {
+	background: var(--clr-primary-dark);
+}
+
+/* button.btn-default {
+}
+
+button.btn-default:hover {
+	background-color: var(--clr-muted-hover);
+} */
 
 @media (min-width: 1024px) {
-  body {
+  /* body {
     display: flex;
     place-items: center;
-  }
+  } */
 
-  #app {
+  /* #app {
     display: grid;
     grid-template-columns: 1fr 1fr;
     padding: 0 2rem;
-  }
+  } */
 }
