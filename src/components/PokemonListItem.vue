@@ -53,6 +53,8 @@ computed(() => {
 
 .pokemon-name {
 	text-transform: capitalize;
+	font-size: 1.375rem;
+	margin-left: 0.625rem;
 }
 
 .favorite-icon {
