@@ -1,17 +1,16 @@
 <template>
-	<div class="pokemon-list-item" @click="onClick">
+	<div class="pokemon-list-item" @click="$emit('click', pokemon)">
 		<!-- Pokémon name -->
 		<p class="pokemon-name">{{ pokemon.name }}</p>
 
 		<!-- Pokémon image -->
-		<div class="favorite-icon" :class="{ 'isFavorite': isFavorite }" @click.stop="onFavorite">
+		<div class="favorite-icon" :class="{ 'isFavorite': isFavorite }" @click.stop="$emit('favorite', pokemon)">
 			<StarIcon />
 		</div>
 	</div>
 </template>
 
 <script setup>
-import { computed } from 'vue';
 import StarIcon from './icons/StarIcon.vue';
 
 defineProps({
@@ -19,19 +18,10 @@ defineProps({
 		type: Object,
 		required: true,
 	},
-
-	onClick: Function,
-	onFavorite: Function,
 	isFavorite: Boolean,
 });
 
-computed(() => {
-	const { name, image } = pokemon;
-	return {
-		name,
-		image,
-	};
-});
+defineEmits(['click', 'favorite'])
 </script>
 
 <style scoped>

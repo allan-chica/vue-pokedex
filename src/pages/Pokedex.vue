@@ -29,30 +29,47 @@
 			<div v-if="showPokemonList" class="content">
 
 				<!-- Seach bar -->
-				<div class="container">
+				<div class="container search-bar-container">
 					<div class="search-bar">
 						<img src="../assets/icons/mag.svg" alt="Search icon">
 						<input type="text" placeholder="Search" />
 					</div>
 				</div>
 
-				<!-- Pokémon list -->
-				<div class="container pokemon-list">
-					<PokemonListItem
-						v-for="pokemon in pokemonList"
-						:key="pokemon.name"
-						:pokemon="pokemon"
-						:is-favorite="favoritesStore.isFavorite(pokemon)"
-						:onClick="() => { console.log(pokemon.name) }"
-						:onFavorite="() => {
-							if (favoritesStore.isFavorite(pokemon)) {
-								favoritesStore.removeFavorite(pokemon)
-							} else {
-								favoritesStore.addFavorite(pokemon)
-							}
-						}"
-					/>
+				<div class="container pokemon-lists-container">
+
+					<!-- All pokémon list -->
+					<div v-if="activeList === listTypes.all">
+						<PokemonList
+							:pokemon-list="pokemonList"
+							:is-favorite="pokemon => favoritesStore.isFavorite(pokemon)"
+							@pokemon-click="handlePokemonClick"
+							@pokemon-favorite="handlePokemonFavorite"
+						/>
+					</div>
+
+					<!-- Favorite pokémon list -->
+					<div v-if="activeList === listTypes.favorites">
+						<PokemonList
+							:pokemon-list="favoritesStore.favorites"
+							:is-favorite="pokemon => favoritesStore.isFavorite(pokemon)"
+							@pokemon-click="handlePokemonClick"
+							@pokemon-favorite="handlePokemonFavorite"
+						/>
+					</div>
+
+					<!-- Search results list -->
+					<div v-if="activeList === listTypes.search">
+						<PokemonList
+							:pokemon-list="pokemonList"
+							:is-favorite="pokemon => favoritesStore.isFavorite(pokemon)"
+							@pokemon-click="handlePokemonClick"
+							@pokemon-favorite="handlePokemonFavorite"
+						/>
+					</div>
+
 				</div>
+
 
 				<!-- Bottom navigation -->
 				 <div class="nav">
@@ -75,8 +92,8 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from 'vue'
-import PokemonListItem from '@/components/PokemonListItem.vue'
+import { computed, onMounted, ref } from 'vue'
+import PokemonList from '@/components/PokemonList.vue'
 import ListIcon from '@/components/icons/ListIcon.vue'
 import StarIcon from '@/components/icons/StarIcon.vue'
 import { wait, debounce } from '@/utils'
@@ -96,12 +113,18 @@ const showPokemonList = ref(false)       // Toggles the Pokémon list display
 
 const listTypes = {
 	all: 'All',
-	favorites: 'Favorites'
-} // List types for the bottom navigation
+	favorites: 'Favorites',
+	search: 'Search'
+} // List types
 const activeList = ref(listTypes.all) // Active list type
 
+// Pokémon data
 const pokemonList = ref([])
 
+const searchResults = ref([]) // Search results
+const searchQuery = ref('') // Search query
+
+// Methods
 async function fetchPokemon() {
 	try {
 		const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=20')
@@ -111,6 +134,20 @@ async function fetchPokemon() {
 	} catch (error) {
 		console.error('Error fetching Pokémon:', error)
 		isFetching.value = false
+	}
+}
+
+function handlePokemonClick(pokemon) {
+	// Handle Pokémon click event
+	console.log('Clicked Pokémon:', pokemon)
+}
+
+function handlePokemonFavorite(pokemon) {
+	// Handle Pokémon favorite event
+	if (favoritesStore.isFavorite(pokemon)) {
+		favoritesStore.removeFavorite(pokemon)
+	} else {
+		favoritesStore.addFavorite(pokemon)
 	}
 }
 
@@ -159,6 +196,11 @@ onMounted(() => {
 	height: 100%;
 }
 
+.search-bar-container {
+	position: sticky;
+	top: 0;
+}
+
 .search-bar {
 	background-color: white;
 	border-radius: 5px;
@@ -190,14 +232,12 @@ onMounted(() => {
 	color: var(--clr-muted);
 }
 
-.pokemon-list {
-	display: flex;
-	flex-direction: column;
-	gap: 0.625rem;
+.pokemon-lists-container {
+	padding-bottom: 6.25rem;
 }
 
 .nav {
-	position: absolute;
+	position: fixed;
 	bottom: 0;
 	left: 0;
 	width: 100%;
@@ -259,10 +299,10 @@ onMounted(() => {
 
 @keyframes shake {
 	0%   { transform: rotate(0deg); }
-	20%  { transform: rotate(-20deg); }
-	40%  { transform: rotate(20deg); }
-	60%  { transform: rotate(-10deg); }
-	80%  { transform: rotate(10deg); }
+	20%  { transform: rotate(-15deg); }
+	40%  { transform: rotate(15deg); }
+	60%  { transform: rotate(-5deg); }
+	80%  { transform: rotate(5deg); }
 	100% { transform: rotate(0deg); }
 }
 
