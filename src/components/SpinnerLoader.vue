@@ -1,6 +1,6 @@
 <template>
 	<div class="spinner-loader" :style="{ width: `${size}px`, height: `${size}px` }">
-		<img src="../assets/images/loader.svg">
+		<img src="../assets/images/loader.svg" alt="Loading..." />
 	</div>
 </template>
 

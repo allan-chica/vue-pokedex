@@ -32,7 +32,7 @@
 				<div class="container search-bar-container">
 					<div class="search-bar">
 						<img src="../assets/icons/mag.svg" alt="Search icon">
-						<input type="text" placeholder="Search" />
+						<input type="text" placeholder="Search" v-model="searchQuery" />
 					</div>
 				</div>
 
@@ -62,18 +62,26 @@
 					<!-- Search results list -->
 					<div class="list-container" v-if="activeList === listTypes.search">
 						<PokemonList
-							:pokemon-list="pokemonList"
+							:pokemon-list="searchResults"
 							:is-favorite="pokemon => favoritesStore.isFavorite(pokemon)"
 							@pokemon-click="handlePokemonClick"
 							@pokemon-favorite="handlePokemonFavorite"
 						/>
+
+						<SpinnerLoader v-if="isSearching" />
+
+						<div class="empty-state" v-if="!isSearching && searchResults.length === 0">
+							<h2>Uh-oh!</h2>
+							<p>You look lost on your journey!</p>
+							<button class="btn-primary" @click="resetSearch">Go back home</button>
+						</div>
 					</div>
 
 				</div>
 
 
 				<!-- Bottom navigation -->
-				 <div class="nav">
+				 <div class="nav" :class="{ 'hidden': activeList === listTypes.search }">
 					<div class="container btn-group">
 						<button :class="{ 'btn-primary': activeList === listTypes.all }" @click="activeList = listTypes.all">
 							<ListIcon />
@@ -93,7 +101,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import PokemonList from '@/components/PokemonList.vue'
 import ListIcon from '@/components/icons/ListIcon.vue'
 import StarIcon from '@/components/icons/StarIcon.vue'
@@ -125,6 +133,7 @@ const pokemonList = ref([])
 
 const searchResults = ref([]) // Search results
 const searchQuery = ref('') // Search query
+const isSearching = ref(false) // Flag to indicate if searching
 
 // Methods
 async function fetchPokemon() {
@@ -139,6 +148,7 @@ async function fetchPokemon() {
 	}
 }
 
+// Pokemon event handlers
 function handlePokemonClick(pokemon) {
 	// Handle Pokémon click event
 	console.log('Clicked Pokémon:', pokemon)
@@ -151,6 +161,38 @@ function handlePokemonFavorite(pokemon) {
 	} else {
 		favoritesStore.addFavorite(pokemon)
 	}
+}
+
+// Search functionality
+watch(searchQuery, debounce(async query => {
+	if (query.length === 0) {
+		activeList.value = listTypes.all
+		searchResults.value = []
+		return
+	}
+
+	activeList.value = listTypes.search
+	isSearching.value = true
+
+	try {
+		const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=1025`) // 1025 is the total number of Pokémon up until this date (gen 9)
+		const data = await response.json()
+
+		searchResults.value = data.results.filter(pokemon => {
+			return pokemon.name.toLowerCase().includes(query.toLowerCase())
+		})
+	} catch (error) {
+		console.error('Error fetching Pokémon:', error)
+	} finally {
+		isSearching.value = false
+	}
+
+}, 400))
+
+function resetSearch() {
+	searchQuery.value = ''
+	searchResults.value = []
+	activeList.value = listTypes.all
 }
 
 // #region Shake animation logic
@@ -249,6 +291,28 @@ onMounted(() => {
 	margin: 0 auto;
 }
 
+.empty-state {
+	width: 100%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+}
+
+.empty-state h2 {
+	font-size: 2.25rem;
+	font-weight: bold;
+	color: var(--clr-text-heading);
+}
+
+.empty-state p {
+	font-size: 1.25rem;
+	margin-top: 0.25rem;
+}
+
+.empty-state button {
+	margin-top: 1.5625rem;
+}
+
 .nav {
 	position: fixed;
 	bottom: 0;
@@ -261,6 +325,13 @@ onMounted(() => {
 
 	box-shadow: 0px -5px 4px rgba(0, 0, 0, 0.05);
 	background-color: var(--clr-white);
+
+	transition: transform 0.25s ease-in-out;
+	transform: translateY(0);
+}
+
+.nav.hidden {
+	transform: translateY(100%);
 }
 
 .nav .btn-group {
