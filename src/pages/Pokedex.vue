@@ -39,17 +39,18 @@
 				<div class="container pokemon-lists-container">
 
 					<!-- All pokémon list -->
-					<div v-if="activeList === listTypes.all">
+					<div class="list-container" v-if="activeList === listTypes.all">
 						<PokemonList
 							:pokemon-list="pokemonList"
 							:is-favorite="pokemon => favoritesStore.isFavorite(pokemon)"
 							@pokemon-click="handlePokemonClick"
 							@pokemon-favorite="handlePokemonFavorite"
 						/>
+						<SpinnerLoader />
 					</div>
 
 					<!-- Favorite pokémon list -->
-					<div v-if="activeList === listTypes.favorites">
+					<div class="list-container" v-if="activeList === listTypes.favorites">
 						<PokemonList
 							:pokemon-list="favoritesStore.favorites"
 							:is-favorite="pokemon => favoritesStore.isFavorite(pokemon)"
@@ -59,7 +60,7 @@
 					</div>
 
 					<!-- Search results list -->
-					<div v-if="activeList === listTypes.search">
+					<div class="list-container" v-if="activeList === listTypes.search">
 						<PokemonList
 							:pokemon-list="pokemonList"
 							:is-favorite="pokemon => favoritesStore.isFavorite(pokemon)"
@@ -102,6 +103,7 @@ import { useFavoritesStore } from "@/stores/app"
 const favoritesStore = useFavoritesStore()
 
 import pokeballRaw from '../assets/images/loader.svg?raw' // Import the raw SVG as a string for faster rendering
+import SpinnerLoader from '@/components/SpinnerLoader.vue'
 const pokeballSvg = pokeballRaw
 
 // UI State
@@ -199,6 +201,7 @@ onMounted(() => {
 .search-bar-container {
 	position: sticky;
 	top: 0;
+	z-index: 10;
 }
 
 .search-bar {
@@ -234,6 +237,16 @@ onMounted(() => {
 
 .pokemon-lists-container {
 	padding-bottom: 6.25rem;
+}
+
+.list-container {
+	display: flex;
+	flex-direction: column;
+	gap: 1.5rem;
+}
+
+.list-container .spinner-loader {
+	margin: 0 auto;
 }
 
 .nav {
