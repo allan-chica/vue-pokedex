@@ -46,7 +46,7 @@
 							@pokemon-click="handlePokemonClick"
 							@pokemon-favorite="handlePokemonFavorite"
 						/>
-						<SpinnerLoader />
+						<SpinnerLoader v-if="isLoadingMore && hasMorePokemon"/>
 					</div>
 
 					<!-- Favorite pokémon list -->
@@ -101,7 +101,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch, nextTick, onUnmounted } from 'vue'
 import PokemonList from '@/components/PokemonList.vue'
 import ListIcon from '@/components/icons/ListIcon.vue'
 import StarIcon from '@/components/icons/StarIcon.vue'
@@ -130,21 +130,79 @@ const activeList = ref(listTypes.all) // Active list type
 
 // Pokémon data
 const pokemonList = ref([])
+const currentOffset = ref(0) // Current offset for pagination
+const isLoadingMore = ref(false) // Flag to indicate loading more Pokémon
+const MAX_POKEMON = 1025 // Maximum number of Pokémon to fetch
+const hasMorePokemon = computed(() => pokemonList.value.length < MAX_POKEMON) // Flag to indicate if there are more Pokémon to load
 
 const searchResults = ref([]) // Search results
 const searchQuery = ref('') // Search query
 const isSearching = ref(false) // Flag to indicate if searching
+// Infinite scroll cleanup function
+let cleanupInfiniteScroll = null
 
 // Methods
-async function fetchPokemon() {
+async function fetchPokemon(offset = 0, limit = 30) {
 	try {
-		const response = await fetch('https://pokeapi.co/api/v2/pokemon?limit=20')
+		// Calculate how many Pokémon we need to fetch
+		const remainingPokemon = MAX_POKEMON - pokemonList.value.length
+		const actualLimit = Math.min(limit, remainingPokemon)
+
+		// Don't fetch if we have all Pokémon
+		if (actualLimit <= 0) return
+
+		const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${actualLimit}&offset=${offset}`)
 		const data = await response.json()
-		pokemonList.value = data.results
-		shouldStopShaking.value = true
+
+		if (offset === 0) { // Initial fetch
+			pokemonList.value = data.results
+			currentOffset.value = actualLimit
+		} else { // Fetch more and append to the list
+			pokemonList.value.push(...data.results)
+			currentOffset.value += actualLimit
+		}
+
+		if (offset === 0) {
+			shouldStopShaking.value = true
+		}
+
+		// pokemonList.value = data.results
 	} catch (error) {
 		console.error('Error fetching Pokémon:', error)
-		isFetching.value = false
+		if (offset === 0) {
+			isFetching.value = false
+		}
+	}
+}
+
+async function fetchMorePokemon() {
+	if (isLoadingMore.value || !hasMorePokemon.value) return
+
+	isLoadingMore.value = true
+	await fetchPokemon(currentOffset.value, 30)
+	isLoadingMore.value = false
+}
+
+// Infinite scroll
+function setupInfiniteScroll() {
+	const handleScroll = () => {
+		if (activeList.value !== listTypes.all) return // Only trigger for the "All" list
+
+		// Check if the user has scrolled to the bottom of the page
+		const scrollTop = window.scrollY || document.documentElement.scrollTop
+		const windowHeight = window.innerHeight
+		const documentHeight = document.documentElement.scrollHeight
+
+		// If the user is near the bottom of the page, fetch more Pokémon
+		if (scrollTop + windowHeight >= documentHeight - 200) {
+			fetchMorePokemon()
+		}
+	}
+
+	window.addEventListener('scroll', handleScroll)
+
+	return () => { // Remove the event listener when the component is unmounted
+		window.removeEventListener('scroll', handleScroll)
 	}
 }
 
@@ -175,7 +233,7 @@ watch(searchQuery, debounce(async query => {
 	isSearching.value = true
 
 	try {
-		const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=1025`) // 1025 is the total number of Pokémon up until this date (gen 9)
+		const response = await fetch(`https://pokeapi.co/api/v2/pokemon?limit=${MAX_POKEMON}`) // 1025 is the total number of Pokémon up until this date (gen 9)
 		const data = await response.json()
 
 		searchResults.value = data.results.filter(pokemon => {
@@ -221,6 +279,9 @@ async function playFinishedAnimation() {
 	showSuccessAnimation.value = false
 	isFetching.value = false
 	showPokemonList.value = true
+
+	// Setup infinite scroll after the Pokémon list is shown
+	cleanupInfiniteScroll = setupInfiniteScroll()
 }
 // #endregion
 
@@ -228,6 +289,13 @@ onMounted(() => {
 	fetchPokemon()
 	startShakeLoop()
 })
+
+onUnmounted(() => {
+	if (cleanupInfiniteScroll) {
+		cleanupInfiniteScroll()
+	}
+})
+
 </script>
 
 <style scoped>
