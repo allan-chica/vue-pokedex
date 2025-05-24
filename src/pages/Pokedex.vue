@@ -79,9 +79,8 @@
 
 				</div>
 
-
 				<!-- Bottom navigation -->
-				 <div class="nav" :class="{ 'hidden': activeList === listTypes.search }">
+				<div class="nav" :class="{ 'hidden': activeList === listTypes.search }">
 					<div class="container btn-group">
 						<button :class="{ 'btn-primary': activeList === listTypes.all }" @click="activeList = listTypes.all">
 							<ListIcon />
@@ -93,7 +92,8 @@
 							<span>Favorites</span>
 						</button>
 					</div>
-				 </div>
+				</div>
+
 			</div>
 		</transition>
 
@@ -101,47 +101,50 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref, watch, nextTick, onUnmounted } from 'vue'
+import { computed, onMounted, ref, watch, onUnmounted } from 'vue'
+import { wait, debounce } from '@/utils'
+import { useFavoritesStore } from "@/stores/app"
+import pokeballRaw from '../assets/images/loader.svg?raw' // Import the raw SVG as a string for faster rendering
+
+// Component imports
 import PokemonList from '@/components/PokemonList.vue'
 import ListIcon from '@/components/icons/ListIcon.vue'
 import StarIcon from '@/components/icons/StarIcon.vue'
-import { wait, debounce } from '@/utils'
-
-import { useFavoritesStore } from "@/stores/app"
-const favoritesStore = useFavoritesStore()
-
-import pokeballRaw from '../assets/images/loader.svg?raw' // Import the raw SVG as a string for faster rendering
 import SpinnerLoader from '@/components/SpinnerLoader.vue'
-const pokeballSvg = pokeballRaw
 
-// UI State
-const isFetching = ref(true)             // Flag to indicate loading state
-const isShaking = ref(true)              // Controls the shaking animation
-const shouldStopShaking = ref(false)     // Flag to stop shaking
-const showSuccessAnimation = ref(false)  // Trigger stars animation
-const showPokemonList = ref(false)       // Toggles the Pokémon list display
-
+// Constants
+const MAX_POKEMON = 1025 // Maximum number of Pokémon to fetch
 const listTypes = {
 	all: 'All',
 	favorites: 'Favorites',
 	search: 'Search'
-} // List types
-const activeList = ref(listTypes.all) // Active list type
+}
+const pokeballSvg = pokeballRaw
 
-// Pokémon data
+// #region State management
+const favoritesStore = useFavoritesStore()
+
+// Loading and animation states
+const isFetching = ref(true)            // Flag to indicate loading state
+const isShaking = ref(true)             // Controls the shaking animation
+const shouldStopShaking = ref(false)    // Flag to stop shaking
+const showSuccessAnimation = ref(false) // Trigger stars animation
+const showPokemonList = ref(false)      // Toggles the Pokémon list display
+
+// List management
+const activeList = ref(listTypes.all) // Active list type
 const pokemonList = ref([])
 const currentOffset = ref(0) // Current offset for pagination
 const isLoadingMore = ref(false) // Flag to indicate loading more Pokémon
-const MAX_POKEMON = 1025 // Maximum number of Pokémon to fetch
 const hasMorePokemon = computed(() => pokemonList.value.length < MAX_POKEMON) // Flag to indicate if there are more Pokémon to load
 
+// Search state
 const searchResults = ref([]) // Search results
 const searchQuery = ref('') // Search query
 const isSearching = ref(false) // Flag to indicate if searching
-// Infinite scroll cleanup function
-let cleanupInfiniteScroll = null
+// #endregion
 
-// Methods
+// #region Pokemon data management
 async function fetchPokemon(offset = 0, limit = 30) {
 	try {
 		// Calculate how many Pokémon we need to fetch
@@ -182,8 +185,11 @@ async function fetchMorePokemon() {
 	await fetchPokemon(currentOffset.value, 30)
 	isLoadingMore.value = false
 }
+// #endregion
 
-// Infinite scroll
+// #region Infinite scroll
+let cleanupInfiniteScroll = null
+
 function setupInfiniteScroll() {
 	const handleScroll = () => {
 		if (activeList.value !== listTypes.all) return // Only trigger for the "All" list
@@ -205,8 +211,9 @@ function setupInfiniteScroll() {
 		window.removeEventListener('scroll', handleScroll)
 	}
 }
+// #endregion
 
-// Pokemon event handlers
+// #region Event handlers
 function handlePokemonClick(pokemon) {
 	// Handle Pokémon click event
 	console.log('Clicked Pokémon:', pokemon)
@@ -220,8 +227,16 @@ function handlePokemonFavorite(pokemon) {
 		favoritesStore.addFavorite(pokemon)
 	}
 }
+// #endregion
 
-// Search functionality
+// #region Search functions
+function resetSearch() {
+	searchQuery.value = ''
+	searchResults.value = []
+	activeList.value = listTypes.all
+}
+
+// Search watcher
 watch(searchQuery, debounce(async query => {
 	if (query.length === 0) {
 		activeList.value = listTypes.all
@@ -246,16 +261,10 @@ watch(searchQuery, debounce(async query => {
 	}
 
 }, 400))
+// #endregion
 
-function resetSearch() {
-	searchQuery.value = ''
-	searchResults.value = []
-	activeList.value = listTypes.all
-}
-
-// #region Shake animation logic
-// Loop shake animation until fetch is complete
-async function startShakeLoop() {
+// #region Animation functions
+async function startShakeLoop() { // Loop shake animation until fetch is complete
 	while (true) {
 		isShaking.value = true
 		await wait(1000) // Shake for 1 second
@@ -285,6 +294,7 @@ async function playFinishedAnimation() {
 }
 // #endregion
 
+// #region Lifecycle hooks
 onMounted(() => {
 	fetchPokemon()
 	startShakeLoop()
@@ -295,10 +305,12 @@ onUnmounted(() => {
 		cleanupInfiniteScroll()
 	}
 })
+// #endregion
 
 </script>
 
 <style scoped>
+/* #region Layout */
 .pokedex-container {
 	height: 100%;
 }
@@ -307,7 +319,9 @@ onUnmounted(() => {
 	padding-top: 35px;
 	height: 100%;
 }
+/* #endregion */
 
+/* #region Search bar */
 .search-bar-container {
 	position: sticky;
 	top: 0;
@@ -344,7 +358,9 @@ onUnmounted(() => {
 .search-bar input::placeholder {
 	color: var(--clr-muted);
 }
+/* #endregion */
 
+/* #region Pokemon lists */
 .pokemon-lists-container {
 	padding-bottom: 6.25rem;
 }
@@ -380,7 +396,9 @@ onUnmounted(() => {
 .empty-state button {
 	margin-top: 1.5625rem;
 }
+/* #endregion */
 
+/* #region Navigation */
 .nav {
 	position: fixed;
 	bottom: 0;
@@ -433,6 +451,7 @@ onUnmounted(() => {
 .nav .btn-group button svg {
 	fill: var(--clr-white);
 }
+/* #endregion */
 
 /* #region Loading styles */
 .loading {
