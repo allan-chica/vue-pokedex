@@ -57,6 +57,10 @@
 							@pokemon-click="handlePokemonClick"
 							@pokemon-favorite="handlePokemonFavorite"
 						/>
+
+						<div class="empty-state" v-if="!favoritesStore.favorites.length">
+							<p>Favorite a Pokémon using the <span style="fill: var(--clr-muted);"><StarIcon :size="16" /></span> to see it here.</p>
+						</div>
 					</div>
 
 					<!-- Search results list -->
