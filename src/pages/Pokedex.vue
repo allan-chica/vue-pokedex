@@ -101,6 +101,15 @@
 			</div>
 		</transition>
 
+		<!-- Pokemon Modal -->
+		<PokemonModal
+			:pokemon="selectedPokemon"
+			:show="isModalVisible"
+			@close="closeModal"
+			:is-favorite="pokemon => favoritesStore.isFavorite(pokemon)"
+			@favorite="handlePokemonFavorite"
+		/>
+
 	</div>
 </template>
 
@@ -115,6 +124,7 @@ import PokemonList from '@/components/PokemonList.vue'
 import ListIcon from '@/components/icons/ListIcon.vue'
 import StarIcon from '@/components/icons/StarIcon.vue'
 import SpinnerLoader from '@/components/SpinnerLoader.vue'
+import PokemonModal from '@/components/PokemonModal.vue'
 
 // Constants
 const MAX_POKEMON = 1025 // Maximum number of Pokémon to fetch
@@ -141,6 +151,10 @@ const pokemonList = ref([])
 const currentOffset = ref(0) // Current offset for pagination
 const isLoadingMore = ref(false) // Flag to indicate loading more Pokémon
 const hasMorePokemon = computed(() => pokemonList.value.length < MAX_POKEMON) // Flag to indicate if there are more Pokémon to load
+
+// Modal state
+const isModalVisible = ref(false)
+const selectedPokemon = ref(null)
 
 // Search state
 const searchResults = ref([]) // Search results
@@ -218,9 +232,21 @@ function setupInfiniteScroll() {
 // #endregion
 
 // #region Event handlers
-function handlePokemonClick(pokemon) {
-	// Handle Pokémon click event
-	console.log('Clicked Pokémon:', pokemon)
+async function handlePokemonClick(pokemon) {
+	isModalVisible.value = true
+
+	try {
+		const response = await fetch(pokemon.url)
+		const data = await response.json()
+
+		// TODO: Remove log
+		console.log(data);
+
+		selectedPokemon.value = data
+	} catch (error) {
+		console.error('Error fetching Pokémon details:', error)
+		isModalVisible.value = false
+	}
 }
 
 function handlePokemonFavorite(pokemon) {
@@ -230,6 +256,13 @@ function handlePokemonFavorite(pokemon) {
 	} else {
 		favoritesStore.addFavorite(pokemon)
 	}
+}
+// #endregion
+
+// #region Modal functions
+function closeModal() {
+	isModalVisible.value = false
+	selectedPokemon.value = null
 }
 // #endregion
 

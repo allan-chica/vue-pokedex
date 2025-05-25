@@ -1,0 +1,185 @@
+<template>
+	<Teleport to="body">
+		<!-- Modal overlay -->
+		<transition name="fade">
+			<div v-if="show" class="modal-overlay">
+
+				<!-- Content -->
+				<div class="container">
+
+					<div class="loading" v-if="!pokemon">
+						<SpinnerLoader />
+					</div>
+
+					<div class="modal-content" v-else>
+
+						<!-- Modal Header -->
+						<div class="modal-header">
+							<!-- Close button -->
+							<button @click="closeModal"><CloseIcon/></button>
+
+							<!-- Image -->
+							<img
+								:src="pokemon.sprites.other['official-artwork'].front_default"
+								:alt="`${pokemon.name} image`"
+								class="pokemon-image"
+							/>
+						</div>
+
+						<!-- Modal Body -->
+						<div class="modal-body">
+
+							<StatItem label="Name" :stat="pokemon.name" capitalize />
+
+							<StatItem label="Weight" :stat="pokemonWeight" />
+
+							<StatItem label="Height" :stat="pokemonHeight" />
+
+							<StatItem label="Types" :stat="pokemonTypes" capitalize />
+
+							<div class="btn-group">
+								<button class="btn-primary">Share to my friends</button>
+								<FavoriteToggle
+									:isFavorite="isFavorite(pokemon)"
+									@click="$emit('favorite', pokemon)"
+								/>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+			</div>
+		</transition>
+	</Teleport>
+</template>
+
+<script setup>
+import { computed } from 'vue';
+import FavoriteToggle from './FavoriteToggle.vue';
+import CloseIcon from './icons/CloseIcon.vue';
+import SpinnerLoader from './SpinnerLoader.vue';
+import StatItem from './StatItem.vue';
+
+// Props
+const props = defineProps({
+	pokemon: {
+		type: Object,
+		default: null
+	},
+	show: {
+		type: Boolean,
+		default: false
+	},
+	isFavorite: Function,
+})
+
+// Emits
+const emit = defineEmits(['close', 'favorite'])
+
+// Methods
+function closeModal() {
+	emit('close');
+}
+
+// Computed properties
+const pokemonWeight = computed(() => {
+	if (!props.pokemon) return 0
+	return (props.pokemon.weight / 10).toFixed(1) + ' kg'
+});
+
+const pokemonHeight = computed(() => {
+	if (!props.pokemon) return 0
+	return (props.pokemon.height / 10).toFixed(1) + ' m'
+});
+
+const pokemonTypes = computed(() => {
+	if (!props.pokemon) return []
+	const types = props.pokemon.types.map(type => type.type.name)
+	return types.join(', ')
+});
+
+</script>
+
+<style scoped>
+/* Modal overlay */
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.5);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 1000;
+}
+
+.modal-overlay .container {
+	flex: 1;
+}
+
+/* Loading */
+.loading {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	height: 100%;
+}
+
+/* Modal content */
+.modal-content {
+	background-color: white;
+	width: 100%;
+	border-radius: 0.3125rem;
+	overflow: hidden;
+}
+
+/* Modal header */
+.modal-header {
+	height: 13.75rem;
+	background-image: url('../assets/images/pokemon_bg.jpg');
+	background-repeat: no-repeat;
+	background-size: cover;
+	background-position: center;
+	position: relative;
+
+	display: flex;
+	justify-content: center;
+}
+
+.modal-header img {
+	padding: 1.25rem 0;
+}
+
+.modal-header button {
+	position: absolute;
+	top: 1rem;
+	right: 1rem;
+	background-color: transparent;
+	border: none;
+	cursor: pointer;
+	padding: 0;
+	display: flex;
+}
+
+.modal-header button svg {
+	fill: var(--clr-white);
+	transition: fill 150ms ease;
+}
+
+.modal-header button:hover svg { fill: var(--clr-border); }
+
+/* Modal body */
+.modal-body {
+	padding: 20px 30px;
+}
+
+.modal-body .btn-group {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-top: 1.25rem;
+}
+</style>

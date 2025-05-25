@@ -3,15 +3,15 @@
 		<!-- Pokémon name -->
 		<p class="pokemon-name">{{ pokemon.name }}</p>
 
-		<!-- Pokémon image -->
-		<div class="favorite-icon" :class="{ 'isFavorite': isFavorite }" @click.stop="$emit('favorite', pokemon)">
-			<StarIcon />
-		</div>
+		<FavoriteToggle
+			:isFavorite="isFavorite"
+			@click.stop="$emit('favorite', pokemon)"
+		/>
 	</div>
 </template>
 
 <script setup>
-import StarIcon from './icons/StarIcon.vue';
+import FavoriteToggle from './FavoriteToggle.vue';
 
 defineProps({
 	pokemon: {
@@ -45,26 +45,5 @@ defineEmits(['click', 'favorite'])
 	text-transform: capitalize;
 	font-size: 1.375rem;
 	margin-left: 0.625rem;
-}
-
-.favorite-icon {
-	background-color: var(--clr-light);
-	border-radius: 10rem;
-	padding: 0.5rem;
-	display: flex;
-	transition: 0.2s ease;
-}
-
-.favorite-icon svg {
-	fill: var(--clr-muted);
-	transition: fill 0.2s ease;
-}
-
-.favorite-icon:hover {
-	background-color: var(--clr-border);
-}
-
-.favorite-icon.isFavorite svg {
-	fill: var(--clr-accent-yellow);
 }
 </style>
