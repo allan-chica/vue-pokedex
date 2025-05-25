@@ -35,10 +35,10 @@
 
 							<StatItem label="Height" :stat="pokemonHeight" />
 
-							<StatItem label="Types" :stat="pokemonTypes" capitalize />
+							<StatItem :label="typeLabel" :stat="pokemonTypes" capitalize />
 
 							<div class="btn-group">
-								<button class="btn-primary">Share to my friends</button>
+								<button class="btn-primary" @click="shareInfo">Share to my friends</button>
 								<FavoriteToggle
 									:isFavorite="isFavorite(pokemon)"
 									@click="$emit('favorite', pokemon)"
@@ -56,6 +56,7 @@
 
 <script setup>
 import { computed } from 'vue';
+import { capitalize } from '@/utils';
 import FavoriteToggle from './FavoriteToggle.vue';
 import CloseIcon from './icons/CloseIcon.vue';
 import SpinnerLoader from './SpinnerLoader.vue';
@@ -82,6 +83,21 @@ function closeModal() {
 	emit('close');
 }
 
+function shareInfo() {
+	const textToCopy = `Name: ${capitalize(props.pokemon.name)}, ` +
+		`Weight: ${pokemonWeight.value}, ` +
+		`Height: ${pokemonHeight.value}, ` +
+		`${typeLabel.value}: ${pokemonTypes.value}`;
+
+	navigator.clipboard.writeText(textToCopy)
+		.then(() => {
+			alert('Pokémon info copied to clipboard!');
+		})
+		.catch(err => {
+			console.error('Failed to copy text: ', err);
+		});
+}
+
 // Computed properties
 const pokemonWeight = computed(() => {
 	if (!props.pokemon) return 0
@@ -97,6 +113,10 @@ const pokemonTypes = computed(() => {
 	if (!props.pokemon) return []
 	const types = props.pokemon.types.map(type => type.type.name)
 	return types.join(', ')
+});
+
+const typeLabel = computed(() => {
+	return props.pokemon.types.length > 1 ? 'Types' : 'Type';
 });
 
 </script>
