@@ -2,7 +2,12 @@
 	<Teleport to="body">
 		<!-- Modal overlay -->
 		<transition name="fade">
-			<div v-if="show" class="modal-overlay">
+			<div
+				v-if="show"
+				class="modal-overlay"
+				@click.self="closeModal"
+				tabindex="0"
+			>
 
 				<!-- Content -->
 				<div class="container">
@@ -80,21 +85,21 @@ const emit = defineEmits(['close', 'favorite'])
 
 // Methods
 function closeModal() {
-	emit('close');
+	emit('close')
 }
 
 function shareInfo() {
 	const textToCopy = `Name: ${capitalize(props.pokemon.name)}, ` +
 		`Weight: ${pokemonWeight.value}, ` +
 		`Height: ${pokemonHeight.value}, ` +
-		`${typeLabel.value}: ${pokemonTypes.value}`;
+		`${typeLabel.value}: ${pokemonTypes.value}`
 
 	navigator.clipboard.writeText(textToCopy)
 		.then(() => {
-			alert('Pokémon info copied to clipboard!');
+			alert('Pokémon info copied to clipboard!')
 		})
 		.catch(err => {
-			console.error('Failed to copy text: ', err);
+			console.error('Failed to copy text: ', err)
 		});
 }
 
@@ -226,5 +231,6 @@ watch(() => props.pokemon, (newPokemon) => {
 	justify-content: space-between;
 	align-items: center;
 	margin-top: 1.25rem;
+	gap: 1rem;
 }
 </style>
