@@ -239,9 +239,6 @@ async function handlePokemonClick(pokemon) {
 		const response = await fetch(pokemon.url)
 		const data = await response.json()
 
-		// TODO: Remove log
-		console.log(data);
-
 		selectedPokemon.value = data
 	} catch (error) {
 		console.error('Error fetching Pokémon details:', error)

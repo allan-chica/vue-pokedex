@@ -41,7 +41,7 @@
 								<button class="btn-primary" @click="shareInfo">Share to my friends</button>
 								<FavoriteToggle
 									:isFavorite="isFavorite(pokemon)"
-									@click="$emit('favorite', pokemon)"
+									@click="$emit('favorite', pokemonObj)"
 								/>
 							</div>
 						</div>
@@ -55,7 +55,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, watch } from 'vue';
 import { capitalize } from '@/utils';
 import FavoriteToggle from './FavoriteToggle.vue';
 import CloseIcon from './icons/CloseIcon.vue';
@@ -98,25 +98,50 @@ function shareInfo() {
 		});
 }
 
+function playPokemonCry() {
+	if (props.pokemon?.cries?.latest) {
+		const audio = new Audio(props.pokemon.cries.latest)
+		audio.volume = 0.1
+		audio.play()
+			.catch(err => {
+				console.error('Failed to play Pokémon cry:', err);
+			})
+	}
+}
+
 // Computed properties
 const pokemonWeight = computed(() => {
 	if (!props.pokemon) return 0
 	return (props.pokemon.weight / 10).toFixed(1) + ' kg'
-});
+})
 
 const pokemonHeight = computed(() => {
 	if (!props.pokemon) return 0
 	return (props.pokemon.height / 10).toFixed(1) + ' m'
-});
+})
 
 const pokemonTypes = computed(() => {
 	if (!props.pokemon) return []
 	const types = props.pokemon.types.map(type => type.type.name)
 	return types.join(', ')
-});
+})
 
 const typeLabel = computed(() => {
 	return props.pokemon.types.length > 1 ? 'Types' : 'Type';
+})
+
+const pokemonObj = computed(() => {
+	if (!props.pokemon) return null
+
+	const poke = props.pokemon
+	return { name: poke.name, url: `https://pokeapi.co/api/v2/pokemon/${poke.id}/` }
+});
+
+// Watchers
+watch(() => props.pokemon, (newPokemon) => {
+	if (newPokemon) {
+		playPokemonCry();
+	}
 });
 
 </script>
