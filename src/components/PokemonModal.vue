@@ -60,7 +60,18 @@
 
 							<StatItem label="Height" :stat="pokemonHeight" />
 
-							<StatItem :label="typeLabel" :stat="pokemonTypes" capitalize />
+							<StatItem :label="typeLabel">
+								<span class="types">
+									<span
+										v-for="(type, index) in pokemon.types"
+										:key="index"
+										class="type"
+										:style="{ backgroundColor: typeColors[type.type.name] }"
+									>
+										{{ type.type.name }}
+									</span>
+								</span>
+							</StatItem>
 
 							<div class="btn-group">
 								<button class="btn-primary" @click="shareInfo">Share to my friends</button>
@@ -272,6 +283,18 @@ onUnmounted(() => {
 /* Modal body */
 .modal-body {
 	padding: 20px 30px;
+}
+
+.modal-body .types {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.modal-body .type {
+	padding: 0 0.5rem;
+	border-radius: 0.25rem;
+	text-transform: capitalize;
 }
 
 .modal-body .btn-group {
