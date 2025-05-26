@@ -25,10 +25,18 @@
 							<img
 								class="bg-img"
 								src="../assets/images/pokemon_bg.jpg"
-								alt=""
+								alt="Background image"
 								:style="{
 									transform: `translate(${mouseX}px, ${mouseY}px) scale(1.05)`,
 									transition: 'transform 0.1s ease-out'
+								}"
+							/>
+
+							<div
+								class="bg-img"
+								alt=""
+								:style="{
+									backgroundColor: typeColors[pokemon.types[0].type.name] || 'transparent',
 								}"
 							/>
 
@@ -72,12 +80,13 @@
 </template>
 
 <script setup>
-import { computed, watch, ref, onMounted, onUnmounted } from 'vue';
-import { capitalize } from '@/utils';
-import FavoriteToggle from './FavoriteToggle.vue';
-import CloseIcon from './icons/CloseIcon.vue';
-import SpinnerLoader from './SpinnerLoader.vue';
-import StatItem from './StatItem.vue';
+import { computed, watch, ref, onMounted, onUnmounted } from 'vue'
+import { capitalize } from '@/utils'
+import { typeColors } from '@/constants/pokemonTypes'
+import FavoriteToggle from './FavoriteToggle.vue'
+import CloseIcon from './icons/CloseIcon.vue'
+import SpinnerLoader from './SpinnerLoader.vue'
+import StatItem from './StatItem.vue'
 
 // Props
 const props = defineProps({
