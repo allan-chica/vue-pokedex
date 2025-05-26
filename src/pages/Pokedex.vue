@@ -309,7 +309,7 @@ async function startShakeLoop() { // Loop shake animation until fetch is complet
 		await wait(100) // Pause between shakes
 	}
 
-	await wait(300) // Delay before showing stars
+	await wait(100) // Delay before showing stars
 	playFinishedAnimation()
 }
 
@@ -317,7 +317,7 @@ async function playFinishedAnimation() {
 	showSuccessAnimation.value = true
 
 	// Wait for a bit before showing the Pokémon list
-	await wait(1500)
+	await wait(800)
 
 	showSuccessAnimation.value = false
 	isFetching.value = false
