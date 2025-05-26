@@ -233,4 +233,25 @@ watch(() => props.pokemon, (newPokemon) => {
 	margin-top: 1.25rem;
 	gap: 1rem;
 }
+
+/* Modal transitions */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.150s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+
+.fade-enter-active .modal-content,
+.fade-leave-active .modal-content {
+  transition: transform 0.150s ease;
+}
+
+.fade-enter-from .modal-content,
+.fade-leave-to .modal-content {
+  transform: scale(0.95) translateY(-30px);
+}
 </style>
