@@ -20,6 +20,26 @@
 
 						<!-- Modal Header -->
 						<div class="modal-header">
+
+							<!-- Background image -->
+							<img
+								class="bg-img"
+								src="../assets/images/pokemon_bg.jpg"
+								alt="Background image"
+								:style="{
+									transform: `translate(${mouseX}px, ${mouseY}px) scale(1.05)`,
+									transition: 'transform 0.1s ease-out'
+								}"
+							/>
+
+							<div
+								class="bg-img"
+								alt=""
+								:style="{
+									backgroundColor: typeColors[pokemon.types[0].type.name] || 'transparent',
+								}"
+							/>
+
 							<!-- Close button -->
 							<button @click="closeModal"><CloseIcon/></button>
 
@@ -40,7 +60,18 @@
 
 							<StatItem label="Height" :stat="pokemonHeight" />
 
-							<StatItem :label="typeLabel" :stat="pokemonTypes" capitalize />
+							<StatItem :label="typeLabel">
+								<span class="types">
+									<span
+										v-for="(type, index) in pokemon.types"
+										:key="index"
+										class="type"
+										:style="{ backgroundColor: typeColors[type.type.name] }"
+									>
+										{{ type.type.name }}
+									</span>
+								</span>
+							</StatItem>
 
 							<div class="btn-group">
 								<button class="btn-primary" @click="shareInfo">Share to my friends</button>
@@ -60,12 +91,13 @@
 </template>
 
 <script setup>
-import { computed, watch } from 'vue';
-import { capitalize } from '@/utils';
-import FavoriteToggle from './FavoriteToggle.vue';
-import CloseIcon from './icons/CloseIcon.vue';
-import SpinnerLoader from './SpinnerLoader.vue';
-import StatItem from './StatItem.vue';
+import { computed, watch, ref, onMounted, onUnmounted } from 'vue'
+import { capitalize } from '@/utils'
+import { typeColors } from '@/constants/pokemonTypes'
+import FavoriteToggle from './FavoriteToggle.vue'
+import CloseIcon from './icons/CloseIcon.vue'
+import SpinnerLoader from './SpinnerLoader.vue'
+import StatItem from './StatItem.vue'
 
 // Props
 const props = defineProps({
@@ -80,12 +112,33 @@ const props = defineProps({
 	isFavorite: Function,
 })
 
+// Data
+const mouseX = ref(0)
+const mouseY = ref(0)
+
 // Emits
 const emit = defineEmits(['close', 'favorite'])
 
 // Methods
 function closeModal() {
 	emit('close')
+}
+
+function playPokemonCry() {
+	if (props.pokemon?.cries?.latest) {
+		const audio = new Audio(props.pokemon.cries.latest)
+		audio.volume = 0.1
+		audio.play()
+			.catch(err => {
+				console.error('Failed to play Pokémon cry:', err);
+			})
+	}
+}
+
+function handleMouseMove(e) {
+	const { innerWidth, innerHeight } = window
+	mouseX.value = (e.clientX / innerWidth - 0.5) * 10
+	mouseY.value = (e.clientY / innerHeight - 0.5) * 10
 }
 
 function shareInfo() {
@@ -101,17 +154,6 @@ function shareInfo() {
 		.catch(err => {
 			console.error('Failed to copy text: ', err)
 		});
-}
-
-function playPokemonCry() {
-	if (props.pokemon?.cries?.latest) {
-		const audio = new Audio(props.pokemon.cries.latest)
-		audio.volume = 0.1
-		audio.play()
-			.catch(err => {
-				console.error('Failed to play Pokémon cry:', err);
-			})
-	}
 }
 
 // Computed properties
@@ -147,6 +189,15 @@ watch(() => props.pokemon, (newPokemon) => {
 	if (newPokemon) {
 		playPokemonCry();
 	}
+});
+
+// Lifecycle hooks
+onMounted(() => {
+	window.addEventListener('mousemove', handleMouseMove);
+});
+
+onUnmounted(() => {
+	window.removeEventListener('mousemove', handleMouseMove);
 });
 
 </script>
@@ -189,18 +240,26 @@ watch(() => props.pokemon, (newPokemon) => {
 /* Modal header */
 .modal-header {
 	height: 13.75rem;
-	background-image: url('../assets/images/pokemon_bg.jpg');
-	background-repeat: no-repeat;
-	background-size: cover;
-	background-position: center;
 	position: relative;
 
 	display: flex;
 	justify-content: center;
+	overflow: hidden;
 }
 
-.modal-header img {
+.modal-header .bg-img {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	object-fit: fill;
+	z-index: 0;
+}
+
+.modal-header .pokemon-image {
 	padding: 1.25rem 0;
+	z-index: 1;
 }
 
 .modal-header button {
@@ -224,6 +283,18 @@ watch(() => props.pokemon, (newPokemon) => {
 /* Modal body */
 .modal-body {
 	padding: 20px 30px;
+}
+
+.modal-body .types {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 0.5rem;
+}
+
+.modal-body .type {
+	padding: 0 0.5rem;
+	border-radius: 0.25rem;
+	text-transform: capitalize;
 }
 
 .modal-body .btn-group {

@@ -2,6 +2,7 @@
 	<div class="stat">
 		<span class="stat-title">{{ label }}: </span>
 		<span :class="{ 'capitalize': capitalize }">{{ stat }}</span>
+		<slot></slot>
 	</div>
 </template>
 
