@@ -350,8 +350,7 @@ onUnmounted(() => {
 }
 
 .content {
-	padding-top: 35px;
-	height: 100%;
+	padding-top: 2.1875rem;
 }
 /* #endregion */
 
