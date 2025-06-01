@@ -2,6 +2,8 @@
 
 A simple Pokédex web app built with [Vue 3](https://vuejs.org/) and [Vite](https://vitejs.dev/). It fetches Pokémon data from the [PokéAPI](https://pokeapi.co/) and displays a list of Pokémon on the homepage. You're also able to save Pokémon into a list of favorites.
 
+Live version here: https://vue-pokedex-6.netlify.app
+
 ## Tech Stack
 
 - [Vue 3](https://vuejs.org/)
